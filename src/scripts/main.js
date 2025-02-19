@@ -4,28 +4,52 @@ const body = document.querySelector('body');
 const successBothClick = { left: false, right: false };
 
 const firstPromise = new Promise((resolve, reject) => {
-  body.addEventListener('click', (e) => {
-    if (e.clientX <= body.clientWidth / 2) {
-      successBothClick.left = true;
-      resolve('First promise was resolved');
-    }
-  });
+  body.addEventListener(
+    'click',
+    (e) => {
+      if (e.clientX <= body.clientWidth / 2) {
+        successBothClick.left = true;
+        resolve('First promise was resolved');
+      }
+    },
+    { once: true },
+  );
 
   setTimeout(() => reject(new Error('First promise was rejected')), 3000);
 });
 
-const secondPromise = new Promise((resolve, reject) => [
-  body.addEventListener('click', (e) => {
-    if (e.clientX > body.clientWidth / 2) {
-      successBothClick.right = true;
-    }
-    resolve('Second promise was resolved');
-  }),
-]);
+const secondPromise = new Promise((resolve, reject) => {
+  body.addEventListener(
+    'click',
+    (e) => {
+      if (e.clientX > body.clientWidth / 2) {
+        successBothClick.right = true;
+      }
+      resolve('Second promise was resolved');
+    },
+    { once: true },
+  );
 
-const thirdPromise = new Promise((resolve, reject) => {
-  resolve('Third promise was resolved');
+  body.addEventListener(
+    'contextmenu',
+    (e) => {
+      e.preventDefault();
+
+      if (e.clientX > body.clientWidth / 2) {
+        successBothClick.right = true;
+      }
+      resolve('Second promise was resolved');
+    },
+    { once: true },
+  );
 });
+
+const thirdPromise = new Promise(
+  (resolve, reject) => {
+    resolve('Third promise was resolved');
+  },
+  { once: true },
+);
 
 firstPromise
   .then((text) => {
