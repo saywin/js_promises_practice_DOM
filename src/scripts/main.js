@@ -7,14 +7,13 @@ const firstPromise = new Promise((resolve, reject) => {
   body.addEventListener(
     'click',
     (e) => {
-      if (e.clientX <= body.clientWidth / 2) {
+      if (e.button === 0) {
         successBothClick.left = true;
         resolve('First promise was resolved');
       }
     },
     { once: true },
   );
-
   setTimeout(() => reject(new Error('First promise was rejected')), 3000);
 });
 
@@ -22,10 +21,11 @@ const secondPromise = new Promise((resolve, reject) => {
   body.addEventListener(
     'click',
     (e) => {
-      if (e.clientX > body.clientWidth / 2) {
-        successBothClick.right = true;
+      if (e.button === 0) {
+        successBothClick.left = true;
+        resolve('Second promise was resolved');
+        checkThirdPromise();
       }
-      resolve('Second promise was resolved');
     },
     { once: true },
   );
@@ -34,27 +34,17 @@ const secondPromise = new Promise((resolve, reject) => {
     'contextmenu',
     (e) => {
       e.preventDefault();
-
-      if (e.clientX > body.clientWidth / 2) {
-        successBothClick.right = true;
-      }
+      successBothClick.right = true;
       resolve('Second promise was resolved');
+      checkThirdPromise();
     },
     { once: true },
   );
 });
 
-const thirdPromise = new Promise(
-  (resolve, reject) => {
-    resolve('Third promise was resolved');
-  },
-  { once: true },
-);
-
 firstPromise
   .then((text) => {
     message(text, 'success');
-    checkThirdPromise(thirdPromise);
   })
   .catch((error) => {
     message(error.message, 'error');
@@ -62,7 +52,6 @@ firstPromise
 
 secondPromise.then((text) => {
   message(text, 'success');
-  checkThirdPromise(thirdPromise);
 });
 
 function message(text, value) {
@@ -77,8 +66,10 @@ function message(text, value) {
   return createMessage;
 }
 
-function checkThirdPromise(promise) {
+function checkThirdPromise() {
   if (successBothClick.right && successBothClick.left) {
-    promise.then((text) => message(text, 'success'));
+    new Promise((resolve) => {
+      resolve('Third promise was resolved');
+    }).then((text) => message(text, 'success'));
   }
 }
